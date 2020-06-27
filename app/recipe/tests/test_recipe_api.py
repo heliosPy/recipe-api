@@ -105,3 +105,53 @@ class PrivateRecipeAPITest(TestCase):
 
         serializer = RecipeDetailSerializer(recipe)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_basic_recipe(self):
+        """test creating recipe"""
+        payload = {
+           'title': "choclate cheesecake",
+           'time_minutes': 30,
+           'price': 5.00
+        }
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        for key in payload.keys():
+            self.assertEqual(payload[key], getattr(recipe, key))
+
+    def test_create_recipe_with_tags(self):
+
+        tag1 = sample_tag(user=self.user, name='Vegan')
+        tag2 = sample_tag(user=self.user, name="Dessert")
+        payload = {
+           'title': "Avacado lime cheesecake",
+           'tags': [tag1.id, tag2.id],
+           'time_minutes': 60,
+           'price': 15.00
+        }
+        res = self.client.post(RECIPES_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        tags = recipe.tags.all()
+        self.assertEqual(tags.count(), 2)
+        self.assertIn(tag1, tags)
+        self.assertIn(tag2, tags)
+
+    def test_create_recipe_with_ingredients(self):
+        """testing creating recipe with ingredints"""
+        ingredinet1 = sample_ingredient(user=self.user, name="Prwans")
+        ingredinet2 = sample_ingredient(user=self.user, name="Ginger")
+        payload = {
+           'title': "Thai prawn red curry",
+           'ingredients':[ingredinet1.id, ingredinet2.id],
+           'time_minutes': 20,
+           'price': 7.00
+        }
+        res = self.client.post(RECIPES_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data['id'])
+        ingredients = recipe.ingredients.all()
+        self.assertEqual(ingredients.count(),2)
+        self.assertIn(ingredinet1, ingredients)
+        self.assertIn(ingredinet2, ingredients)
