@@ -9,7 +9,7 @@ from core.models import Ingredient
 
 from recipe.serializer import IngredientSerializer
 
-INGREDIENT_URL = reverse('recipe:ingredint-list')
+INGREDIENT_URL = reverse('recipe:ingredient-list')
 
 
 class PublicIngredientApiTests(TestCase):
@@ -44,7 +44,7 @@ class PrivateTagsApiTests(TestCase):
 
         res = self.client.get(INGREDIENT_URL)
 
-        ingredint = Tag.objects.all().order_by('-name')
+        ingredint = Ingredient.objects.all().order_by('-name')
         serializer = IngredientSerializer(ingredint, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
